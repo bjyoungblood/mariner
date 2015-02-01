@@ -38,10 +38,7 @@ program.command('create <name>')
   .action(function(name, options) {
     var migrate = new Migrate(options.directory);
     migrate
-      .init()
-      .then(function() {
-        return migrate.create(name);
-      })
+      .create(name)
       .then(function(created) {
         console.log('Created:', created);
       })

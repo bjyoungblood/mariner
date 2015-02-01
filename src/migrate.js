@@ -234,7 +234,15 @@ export default class Migrate {
 
       var destPath = path.join(this.migrationsDir, filename);
 
-      return pathExists(destPath)
+      return pathExists(this.migrationsDir)
+        .then((exists) => {
+          if (exists) {
+            return;
+          }
+
+          return fs.mkdir(this.migrationsDir);
+        })
+        .then(() => pathExists(destPath))
         .then((exists) => {
           if (exists) {
             throw new MigrationExistsError();
