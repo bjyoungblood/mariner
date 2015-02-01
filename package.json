@@ -2,10 +2,11 @@
   "name": "mariner",
   "version": "0.0.0",
   "description": "Seaworthy migration manager",
-  "main": "index.js",
+  "main": "dist/mariner.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": "./dist/cli.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/bjyoungblood/mariner.git"
@@ -28,6 +29,7 @@
   },
   "dependencies": {
     "bluebird": "^2.9.0",
+    "commander": "^2.6.0",
     "lodash": "^3.0.1",
     "pg": "^4.0.0",
     "squel": "^3.10.0"

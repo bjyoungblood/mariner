@@ -1,3 +1,5 @@
+JSCS = node_modules/.bin/jscs
+JSHINT = node_modules/.bin/jshint
 6TO5 = node_modules/.bin/6to5
 
 export NODE_ENV = test
@@ -6,6 +8,7 @@ export NODE_ENV = test
 
 build:
 	$(6TO5) src/ --modules common --out-dir dist
+	chmod +x dist/cli.js
 
 clean:
 	rm -rf dist
@@ -15,5 +18,5 @@ dist:
 	make build
 
 lint:
-	jshint .
-	jscs -c .jscsrc .
+	$(JSHINT) .
+	$(JSCS) -c .jscsrc .
