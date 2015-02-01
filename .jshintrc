@@ -1,0 +1,13 @@
+{
+  "esnext"        : true,
+  "eqeqeq"        : true,
+  "freeze"        : true,
+  "globalstrict"  : true,
+  "latedef"       : true,
+  "maxdepth"      : 3,
+  "maxstatements" : 15,
+  "node"          : true,
+  "strict"        : true,
+  "unused"        : "vars",
+  "predef"        : ["-Promise"]
+}

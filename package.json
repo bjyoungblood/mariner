@@ -1,0 +1,35 @@
+{
+  "name": "mariner",
+  "version": "0.0.0",
+  "description": "Seaworthy migration manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bjyoungblood/mariner.git"
+  },
+  "keywords": [
+    "postgres",
+    "migration",
+    "migrate"
+  ],
+  "author": "Ben Youngblood <bx.youngblood@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bjyoungblood/mariner/issues"
+  },
+  "homepage": "https://github.com/bjyoungblood/mariner",
+  "devDependencies": {
+    "6to5": "^3.3.2",
+    "jscs": "^1.10.0",
+    "jshint": "^2.6.0"
+  },
+  "dependencies": {
+    "bluebird": "^2.9.0",
+    "lodash": "^3.0.1",
+    "pg": "^4.0.0",
+    "squel": "^3.10.0"
+  }
+}
