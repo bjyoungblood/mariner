@@ -4,6 +4,7 @@
   "description": "Seaworthy migration manager",
   "main": "dist/mariner.js",
   "scripts": {
+    "prepublish": "make dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": "./dist/cli.js",
