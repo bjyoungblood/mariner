@@ -2,9 +2,16 @@
 
 import { format } from 'util';
 
-export class MarinerError extends Error {}
+class MarinerError extends Error {
+  constructor(message, code) {
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+    this.message = message;
+    this.code = code;
+  }
+}
 
-export class MigrationsDirectoryNotFoundError extends MarinerError {
+class MigrationsDirectoryNotFoundError extends MarinerError {
   constructor(...args) {
     super(...args);
 
@@ -13,7 +20,7 @@ export class MigrationsDirectoryNotFoundError extends MarinerError {
   }
 }
 
-export class MigrationExistsError extends MarinerError {
+class MigrationExistsError extends MarinerError {
   constructor(...args) {
     super(...args);
 
@@ -22,7 +29,7 @@ export class MigrationExistsError extends MarinerError {
   }
 }
 
-export class MigrationMissingError extends MarinerError {
+class MigrationMissingError extends MarinerError {
   constructor(list, ...args) {
     super(...args);
 
@@ -34,7 +41,7 @@ export class MigrationMissingError extends MarinerError {
   }
 }
 
-export class InvalidMigrationError extends MarinerError {
+class InvalidMigrationError extends MarinerError {
   constructor(migrationName, ...args) {
     super(...args);
 
@@ -43,7 +50,7 @@ export class InvalidMigrationError extends MarinerError {
   }
 }
 
-export class NoDownMigrationError extends MarinerError {
+class NoDownMigrationError extends MarinerError {
   constructor(migrationName, ...args) {
     super(...args);
 
@@ -51,3 +58,12 @@ export class NoDownMigrationError extends MarinerError {
     this.message = 'Migration has no down: ' + migrationName;
   }
 }
+
+export default {
+  MarinerError,
+  MigrationsDirectoryNotFoundError,
+  MigrationExistsError,
+  MigrationMissingError,
+  InvalidMigrationError,
+  NoDownMigrationError,
+};

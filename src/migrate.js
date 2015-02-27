@@ -143,7 +143,14 @@ export default class Migrate {
     assert(direction === UP || direction === DOWN, 'direction must be one of: up, down');
 
     return this.getMigrationSqlFromFile(direction, name)
-      .then((sql) => this.store.migrate(direction, name, sql));
+      .then((sql) => this.store.migrate(direction, name, sql))
+      .tap(() => {
+        if (direction === UP) {
+          console.log('⛵\tUP: %s', name);
+        } else {
+          console.log('⛵\tDOWN: %s', name);
+        }
+      });
   }
 
   getMigrationSqlFromFile(direction, name) {
