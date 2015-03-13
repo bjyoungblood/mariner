@@ -13,7 +13,7 @@ squel.useFlavour('postgres');
 const UP = 'up';
 
 const CHECK_TABLE = 'SELECT * FROM information_schema.tables WHERE table_name = $1';
-const LIST_RUN_MIGRATIONS = 'SELECT * FROM %s';
+const LIST_RUN_MIGRATIONS = 'SELECT * FROM %s ORDER BY name';
 
 export default class Store {
   constructor(client, tableName = 'migrations') {
