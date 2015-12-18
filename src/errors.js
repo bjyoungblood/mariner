@@ -64,7 +64,7 @@ class SqlMigrationError extends MarinerError {
     super(...args);
 
     this.name = 'SqlMigrationError';
-    this.message = 'Migration sql error: "' + sqlError + '" in migration ' + migrationName;
+    this.message = 'Migration ' + migrationName + ' resulted in the following error: ' + sqlError;
   }
 }
 
