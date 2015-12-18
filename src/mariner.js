@@ -4,24 +4,6 @@ import './promisify';
 
 import PgStore from './pg-store';
 import Migrate from './migrate';
-import {
-  MarinerError,
-  MigrationsDirectoryNotFoundError,
-  MigrationExistsError,
-  MigrationMissingError,
-  InvalidMigrationError,
-  NoDownMigrationError,
-  SqlMigrationError
-} from './errors';
 
-export default {
-  PgStore,
-  Migrate,
-  MarinerError,
-  MigrationsDirectoryNotFoundError,
-  MigrationExistsError,
-  MigrationMissingError,
-  InvalidMigrationError,
-  NoDownMigrationError,
-  SqlMigrationError,
-};
+export * from './errors';
+export { PgStore, Migrate };

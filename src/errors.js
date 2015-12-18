@@ -2,8 +2,9 @@
 
 import { format } from 'util';
 
-class MarinerError extends Error {
+export class MarinerError extends Error {
   constructor(message, code) {
+    super(message);
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.message = message;
@@ -11,7 +12,7 @@ class MarinerError extends Error {
   }
 }
 
-class MigrationsDirectoryNotFoundError extends MarinerError {
+export class MigrationsDirectoryNotFoundError extends MarinerError {
   constructor(...args) {
     super(...args);
 
@@ -20,7 +21,7 @@ class MigrationsDirectoryNotFoundError extends MarinerError {
   }
 }
 
-class MigrationExistsError extends MarinerError {
+export class MigrationExistsError extends MarinerError {
   constructor(...args) {
     super(...args);
 
@@ -29,7 +30,7 @@ class MigrationExistsError extends MarinerError {
   }
 }
 
-class MigrationMissingError extends MarinerError {
+export class MigrationMissingError extends MarinerError {
   constructor(list, ...args) {
     super(...args);
 
@@ -41,7 +42,7 @@ class MigrationMissingError extends MarinerError {
   }
 }
 
-class InvalidMigrationError extends MarinerError {
+export class InvalidMigrationError extends MarinerError {
   constructor(migrationName, ...args) {
     super(...args);
 
@@ -50,7 +51,7 @@ class InvalidMigrationError extends MarinerError {
   }
 }
 
-class NoDownMigrationError extends MarinerError {
+export class NoDownMigrationError extends MarinerError {
   constructor(migrationName, ...args) {
     super(...args);
 
@@ -59,7 +60,7 @@ class NoDownMigrationError extends MarinerError {
   }
 }
 
-class SqlMigrationError extends MarinerError {
+export class SqlMigrationError extends MarinerError {
   constructor(migrationName, sqlError, ...args) {
     super(...args);
 
@@ -67,13 +68,3 @@ class SqlMigrationError extends MarinerError {
     this.message = 'Migration ' + migrationName + ' resulted in the following error: ' + sqlError;
   }
 }
-
-export default {
-  MarinerError,
-  MigrationsDirectoryNotFoundError,
-  MigrationExistsError,
-  MigrationMissingError,
-  InvalidMigrationError,
-  NoDownMigrationError,
-  SqlMigrationError,
-};

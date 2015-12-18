@@ -10,7 +10,7 @@ import path from 'path';
 
 import Migrate from './migrate';
 import Store from './pg-store';
-import errors from './errors';
+import { MarinerError } from './errors';
 
 function getClient(connectionString) {
   return new Promise(function(resolve, reject) {
@@ -42,7 +42,7 @@ program.command('create <name>')
       .then(function(created) {
         console.log('Created:', created);
       })
-      .catch(errors.MarinerError, function(err) {
+      .catch(MarinerError, function(err) {
         console.error('⛵\tERROR: ', err.message);
         process.exit(1);
       })
@@ -68,7 +68,7 @@ program.command('migrate <direction>')
         .then(function() {
           return migrate.run(direction, count);
         })
-        .catch(errors.MarinerError, function(err) {
+        .catch(MarinerError, function(err) {
           console.error('⛵\tERROR: ', err.message);
           process.exit(1);
         });
