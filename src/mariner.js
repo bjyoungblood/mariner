@@ -11,6 +11,7 @@ import {
   MigrationMissingError,
   InvalidMigrationError,
   NoDownMigrationError,
+  SqlMigrationError
 } from './errors';
 
 export default {
@@ -22,4 +23,5 @@ export default {
   MigrationMissingError,
   InvalidMigrationError,
   NoDownMigrationError,
+  SqlMigrationError,
 };

@@ -15,6 +15,7 @@ import {
   MigrationMissingError,
   InvalidMigrationError,
   NoDownMigrationError,
+  SqlMigrationError,
 } from './errors';
 
 const UP = 'up';
@@ -150,6 +151,9 @@ export default class Migrate {
         } else {
           console.log('⛵\tDOWN: %s', name);
         }
+      })
+      .catch((err) => {
+        throw new SqlMigrationError(name, err.message);
       });
   }
 

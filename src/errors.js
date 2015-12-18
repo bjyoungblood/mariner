@@ -59,6 +59,15 @@ class NoDownMigrationError extends MarinerError {
   }
 }
 
+class SqlMigrationError extends MarinerError {
+  constructor(migrationName, sqlError, ...args) {
+    super(...args);
+
+    this.name = 'SqlMigrationError';
+    this.message = 'Migration sql error: "' + sqlError + '" in migration ' + migrationName;
+  }
+}
+
 export default {
   MarinerError,
   MigrationsDirectoryNotFoundError,
@@ -66,4 +75,5 @@ export default {
   MigrationMissingError,
   InvalidMigrationError,
   NoDownMigrationError,
+  SqlMigrationError,
 };
