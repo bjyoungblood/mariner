@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/bjyoungblood/mariner",
   "devDependencies": {
-    "6to5": "^3.3.2",
+    "babel": "^5.8.34",
     "jscs": "^1.10.0",
     "jshint": "^2.6.0"
   },
