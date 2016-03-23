@@ -32,13 +32,13 @@ let defaultDb = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
 program.version(require('../package.json').version);
 
-program.command('create <name>')
+program.command('create <name...>')
   .option('-d, --directory <directory>', 'Path to migrations', defaultPath)
   .description('Create a new database migration')
   .action(function(name, options) {
     let migrate = new Migrate(options.directory);
     migrate
-      .create(name)
+      .create(name.join('-'))
       .then(function(created) {
         console.log('Created:', created);
       })
