@@ -55,11 +55,12 @@ function timestamp() {
 }
 
 export default class Migrate {
-  constructor(migrationsDir, store) {
+  constructor(migrationsDir, store, options = {}) {
     assert(_.isString(migrationsDir), 'Migrate must be passed a migrations directory');
     this.migrationsDir = migrationsDir;
 
     this.store = null;
+    this.options = options;
 
     if (store) {
       this.setStore(store);
@@ -83,6 +84,10 @@ export default class Migrate {
 
           if (file.match(MIGRATION_PATTERN)) {
             return true;
+          }
+
+          if (this.options.stopOnWarning) {
+            throw new InvalidMigrationError(`${file} (invalid filename)`);
           }
 
           console.log(chalk.yellow(`${chalk.red('[WARNING]')} skipping ${file} (invalid filename)`));

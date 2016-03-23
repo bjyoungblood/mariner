@@ -56,13 +56,16 @@ program.command('migrate <direction>')
   .option('-n, --number <number>', 'How many migrations to run', null)
   .option('-c, --connection <connection>', 'Database connection string', defaultDb)
   .option('-d, --directory <directory>', 'Path to migrations', defaultPath)
+  .option('-s, --stop-on-warning', 'Stops immediately on warnings (such as an invalid filename)')
   .description('Run database migrations; up defaults to running all, down defaults to running last')
   .action(function(direction, options) {
     let count = options.number ? Number(options.number) : null;
 
     Promise.using(getClient(options.connection), function(client) {
       let store = new Store(client);
-      let migrate = new Migrate(options.directory, store);
+      let migrate = new Migrate(options.directory, store, {
+        stopOnWarning : options.stopOnWarning,
+      });
 
       return migrate.init()
         .then(function() {
