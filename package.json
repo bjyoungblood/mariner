@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "bluebird": "^2.9.0",
+    "chalk": "^1.1.1",
     "commander": "^2.6.0",
     "lodash": "^3.0.1",
     "pg": "^4.0.0",

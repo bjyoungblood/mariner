@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { format } from 'util';
 import Promise from 'bluebird';
+import chalk from 'chalk';
 
 import Store from './pg-store';
 
@@ -24,6 +25,7 @@ const DOWN = 'down';
 const UP_DELIMITER = '---!> MARINER:MIGRATE:UP:';
 const DOWN_DELIMITER = '---!> MARINER:MIGRATE:DOWN:';
 
+const SQL_EXT_PATTERN = /\.sql$/;
 const MIGRATION_PATTERN = /^\d{14}_[A-Za-z0-9\-]+\.sql$/;
 const MIGRATION_NAME_FILTER = /[^A-Za-z0-9\-]+/g;
 
@@ -74,7 +76,18 @@ export default class Migrate {
         return fs.readdirAsync(this.migrationsDir);
       })
       .then((migrationFiles) => {
-        this.migrations = _.filter(migrationFiles, (file) => file.match(MIGRATION_PATTERN));
+        this.migrations = _.filter(migrationFiles, (file) => {
+          if (! file.match(SQL_EXT_PATTERN)) {
+            return false;
+          }
+
+          if (file.match(MIGRATION_PATTERN)) {
+            return true;
+          }
+
+          console.log(chalk.yellow(`${chalk.red('[WARNING]')} skipping ${file} (invalid filename)`));
+          return false;
+        });
       });
   }
 
