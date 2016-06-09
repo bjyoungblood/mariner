@@ -11,6 +11,5 @@ export default class Store {
 
   list() {
     throw new DialectMissingMethod(this.constructor.name, 'list');
-
   }
 }
