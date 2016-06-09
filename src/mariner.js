@@ -1,10 +1,9 @@
-'use strict';
-
 import './promisify';
 
-import PgStore from './pg-store';
-import Migrate from './migrate';
-import {
+export Migrate from './migrate';
+export Store from './store';
+
+export {
   MarinerError,
   MigrationsDirectoryNotFoundError,
   MigrationExistsError,
@@ -12,14 +11,3 @@ import {
   InvalidMigrationError,
   NoDownMigrationError,
 } from './errors';
-
-export default {
-  PgStore,
-  Migrate,
-  MarinerError,
-  MigrationsDirectoryNotFoundError,
-  MigrationExistsError,
-  MigrationMissingError,
-  InvalidMigrationError,
-  NoDownMigrationError,
-};

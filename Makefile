@@ -1,13 +1,12 @@
-JSCS = node_modules/.bin/jscs
-JSHINT = node_modules/.bin/jshint
-6TO5 = node_modules/.bin/6to5
+ESLINT = node_modules/.bin/eslint
+BABEL = node_modules/.bin/babel
 
 export NODE_ENV = test
 
-.PHONY: build clean dist lint
+.PHONY: build clean dist lint lint-quiet
 
 build:
-	$(6TO5) src/ --modules common --out-dir dist
+	$(BABEL) src --out-dir=dist
 	chmod +x dist/cli.js
 
 clean:
@@ -18,5 +17,7 @@ dist:
 	make build
 
 lint:
-	$(JSHINT) .
-	$(JSCS) -c .jscsrc .
+	$(ESLINT) --ext .js .
+
+lint-quiet:
+	$(ESLINT) --ext .js --quiet .
