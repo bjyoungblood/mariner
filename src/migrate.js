@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { format } from 'util';
 import Promise from 'bluebird';
+import chalk from 'chalk';
 
 import Store from './store';
 
@@ -79,7 +80,21 @@ export default class Migrate {
         return fs.readdirAsync(this.migrationsDir);
       })
       .then((migrationFiles) => {
-        this.migrations = _.filter(migrationFiles, (file) => file.match(MIGRATION_PATTERN));
+        this.migrations = _.filter(migrationFiles, (file) => {
+          if (! this.getDialect(file)) {
+            const warning = chalk.yellow(
+              `${chalk.red('[WARNING]')} skipping ${file}, no dialect/plugin`
+            );
+
+            if (this.options.stopOnWarning) {
+              throw new DialectUnknown(this.getDialectFromFile(file));
+            } else {
+              console.log(warning); // eslint-disable-line no-console
+            }
+          }
+
+          return file.match(MIGRATION_PATTERN);
+        });
       })
       .then(() => {
         return this.store.init(_.get(options, options.backend, {}));
@@ -107,9 +122,8 @@ export default class Migrate {
       const missing = _.difference(migrations, this.migrations);
 
       if (missing.length) {
-        //throw new MigrationMissingError(missing);
+        throw new MigrationMissingError(missing);
       }
-
 
       const newMigrations = _.difference(this.migrations, migrations);
 
@@ -187,8 +201,12 @@ export default class Migrate {
       });
   }
 
+  getDialectFromFile(file) {
+    return path.extname(file).replace('.', '');
+  }
+
   getDialect(name) {
-    const ext = path.extname(name).replace('.', '');
+    const ext = this.getDialectFromFile();
 
     return _.find(this.options.dialects, (dialect) => {
       return dialect.constructor.check(ext);

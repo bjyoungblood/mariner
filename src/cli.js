@@ -8,7 +8,10 @@ import _ from 'lodash';
 import nb from 'node-beautify';
 
 import Migrate from './migrate';
-import errors from './errors';
+import {
+  MarinerError,
+  NoConfigError,
+} from './errors';
 
 import jsDialect from './dialect/js/index';
 import sqlDialect from './dialect/sql/index';
@@ -31,7 +34,7 @@ function getConfig() {
 
 function ensureConfig() {
   if (! fs.existsSync(filename)) {
-    throw new errors.NoConfigError();
+    throw new NoConfigError();
   }
 }
 
@@ -91,11 +94,13 @@ const config = init();
 
 program.version(require('../package.json').version);
 
-program.command('create <name>')
+program.command('create <name...>')
   .option('-e, --extension <extension>', 'Dialect Extension', 'sql')
   .description('Create a new database migration')
   .action(function(name, command) {
     ensureConfig();
+
+    name = name.join('-');
 
     const options = command.opts();
 
@@ -106,7 +111,7 @@ program.command('create <name>')
       .then((created) => {
         console.log('Created:', created); // eslint-disable-line no-console
       })
-      .catch(errors.MarinerError, (err) => {
+      .catch(MarinerError, (err) => {
         console.error('⛵\tERROR: ', err.message);  // eslint-disable-line no-console
         process.exit(1);
       })
@@ -144,6 +149,8 @@ program.command('init')
       module.exports = {
         directory: '${options.directory}',
 
+        stopOnWarning: true,
+
         plugins: [
           'sql',
           'js'
@@ -180,7 +187,7 @@ program.command('migrate <direction>')
     .then(() => {
       process.exit(0);
     })
-    .catch(errors.MarinerError, (err) => {
+    .catch(MarinerError, (err) => {
       console.error('⛵\tERROR: ', err.message);  // eslint-disable-line no-console
       process.exit(1);
     })

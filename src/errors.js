@@ -93,17 +93,3 @@ export class DialectUnknown extends MarinerError {
     this.message = `Uknown dialect ${dialect}, try npm install --save mariner-${dialect}`;
   }
 }
-
-export default {
-  MarinerError,
-  MigrationsDirectoryNotFoundError,
-  MigrationExistsError,
-  MigrationMissingError,
-  InvalidMigrationError,
-  NoDownMigrationError,
-
-  NoConfigError,
-
-  DialectMissingMethod,
-  DialectUnknown,
-};
