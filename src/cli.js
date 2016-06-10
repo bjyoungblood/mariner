@@ -8,6 +8,7 @@ import _ from 'lodash';
 import nb from 'node-beautify';
 
 import Migrate from './migrate';
+
 import {
   MarinerError,
   NoConfigError,
@@ -106,8 +107,7 @@ program.command('create <name...>')
 
     const migrate = new Migrate(config);
 
-    migrate
-      .create(name, options)
+    migrate.create(name, options)
       .then((created) => {
         console.log('Created:', created); // eslint-disable-line no-console
       })
@@ -194,7 +194,7 @@ program.command('migrate <direction>')
     .catch((err) => {
       console.error(err.stack);  // eslint-disable-line no-console
       process.exit(1);
-    });;
+    });
   });
 
 program.parse(process.argv);

@@ -206,7 +206,7 @@ export default class Migrate {
   }
 
   getDialect(name) {
-    const ext = this.getDialectFromFile();
+    const ext = this.getDialectFromFile(name);
 
     return _.find(this.options.dialects, (dialect) => {
       return dialect.constructor.check(ext);
@@ -265,5 +265,4 @@ export default class Migrate {
         return dialect.create(destPath, options);
       });
   }
-
 }

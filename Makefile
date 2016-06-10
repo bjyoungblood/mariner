@@ -6,7 +6,7 @@ export NODE_ENV = test
 .PHONY: build clean dist lint lint-quiet
 
 build:
-	$(BABEL) src --out-dir=dist
+	$(BABEL) src/ --modules common --out-dir dist
 	chmod +x dist/cli.js
 
 clean:

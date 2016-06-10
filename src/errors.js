@@ -42,7 +42,7 @@ export class MigrationMissingError extends MarinerError {
 
 export class RuntimeMigrationError extends MarinerError {
   constructor(filename, error, ...args) {
-    super(...args);
+    super(error.message);
 
     this.name = 'RuntimeMigrationError';
     this.message = `${filename}: ${error.message}`;
