@@ -5,8 +5,12 @@ import {
 export default class Store {
   init() {}
 
-  migrate(direction, name, sql) {
-    throw new DialectMissingMethod(this.constructor.name, 'migrate');
+  record(name) {
+    throw new DialectMissingMethod(this.constructor.name, 'record');
+  }
+
+  delete(name) {
+    throw new DialectMissingMethod(this.constructor.name, 'delete');
   }
 
   list() {

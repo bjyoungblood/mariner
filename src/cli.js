@@ -42,7 +42,7 @@ function ensureConfig() {
 function initDialects(config) {
   config.dialects = _.transform(config.plugins, (dialects, plugin) => {
     if (_.isString(plugin)) {
-      const name = plugin.indexOf('mariner-') !== -1 ? name : `mariner-${name}`;
+      const name = plugin.indexOf('mariner-') !== -1 ? plugin : `mariner-${plugin}`;
       const isSql = plugin === 'sql';
       const isInternal = isSql || plugin === 'js';
 

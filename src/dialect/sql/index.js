@@ -3,10 +3,9 @@ import {
   NoDownMigrationError,
 } from '../../errors';
 
-export Store from './store';
+import Store from './store';
 import fs from 'fs';
 import Promise from 'bluebird';
-import Store from './store';
 import SQLStub from './migration.stub';
 
 const UP_DELIMITER = '---!> MARINER:MIGRATE:UP:';

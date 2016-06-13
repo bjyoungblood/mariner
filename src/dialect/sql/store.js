@@ -4,8 +4,6 @@ import {
   Store,
 } from '../../mariner';
 
-const UP = 'up';
-
 export default class sqlStore extends Store {
   static client;
 
@@ -45,20 +43,6 @@ export default class sqlStore extends Store {
     const client = this.getClient();
 
     return client.raw(query, bindings);
-  }
-
-  migrate(direction, name, sql) {
-    let promise;
-
-    if (direction === UP) {
-      promise = this.execute(sql)
-        .then(() => this.recordMigration(name));
-    } else {
-      promise = this.execute(sql)
-        .then(() => this.deleteMigration(name));
-    }
-
-    return promise;
   }
 
   record(name) {
