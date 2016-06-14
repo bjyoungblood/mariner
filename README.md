@@ -11,7 +11,7 @@ Seaworthy migration manager.
   - sqlite3
   - oracle
 
-## Upgrading from <0.4
+## Upgrading from < 0.7
 
 `mariner init -b`
 
