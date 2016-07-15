@@ -1,6 +1,6 @@
 {
   "name": "mariner",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "description": "Seaworthy migration manager",
   "main": "dist/mariner.js",
   "scripts": {
