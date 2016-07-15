@@ -72,7 +72,7 @@ export class NoConfigError extends MarinerError {
     super(...args);
 
     this.name = 'NoConfigError';
-    this.message = 'Could not locate mariner.js file run `mariner generate help` for options';
+    this.message = 'Could not locate mariner.js file run `mariner init --help` for options';
   }
 }
 
