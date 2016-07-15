@@ -1,9 +1,6 @@
-'use strict';
-
 import './promisify';
 
-import PgStore from './pg-store';
-import Migrate from './migrate';
+export Migrate from './migrate';
+export Store from './store';
 
 export * from './errors';
-export { PgStore, Migrate };

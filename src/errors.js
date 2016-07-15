@@ -1,10 +1,8 @@
-'use strict';
-
 import { format } from 'util';
 
 export class MarinerError extends Error {
   constructor(message, code) {
-    super(message);
+    super(...arguments);
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.message = message;
@@ -42,6 +40,15 @@ export class MigrationMissingError extends MarinerError {
   }
 }
 
+export class RuntimeMigrationError extends MarinerError {
+  constructor(filename, error, ...args) {
+    super(error.message);
+
+    this.name = 'RuntimeMigrationError';
+    this.message = `${filename}: ${error.message}`;
+  }
+}
+
 export class InvalidMigrationError extends MarinerError {
   constructor(migrationName, ...args) {
     super(...args);
@@ -60,11 +67,29 @@ export class NoDownMigrationError extends MarinerError {
   }
 }
 
-export class SqlMigrationError extends MarinerError {
-  constructor(migrationName, sqlError, ...args) {
+export class NoConfigError extends MarinerError {
+  constructor(dialect, ...args) {
     super(...args);
 
-    this.name = 'SqlMigrationError';
-    this.message = 'Migration ' + migrationName + ' resulted in the following error: ' + sqlError;
+    this.name = 'NoConfigError';
+    this.message = 'Could not locate mariner.js file run `mariner generate help` for options';
+  }
+}
+
+export class DialectMissingMethod extends MarinerError {
+  constructor(dialect, method, ...args) {
+    super(...args);
+
+    this.name = 'DialectMissingMethod';
+    this.message = `${dialect} must override ${method} method`;
+  }
+}
+
+export class DialectUnknown extends MarinerError {
+  constructor(dialect, ...args) {
+    super(...args);
+
+    this.name = 'DialectUnknown';
+    this.message = `Uknown dialect ${dialect}, try npm install --save mariner-${dialect}`;
   }
 }

@@ -1,10 +1,9 @@
-JSCS = node_modules/.bin/jscs
-JSHINT = node_modules/.bin/jshint
+ESLINT = node_modules/.bin/eslint
 BABEL = node_modules/.bin/babel
 
 export NODE_ENV = test
 
-.PHONY: build clean dist lint
+.PHONY: build clean dist lint lint-quiet
 
 build:
 	$(BABEL) src/ --modules common --out-dir dist
@@ -18,5 +17,7 @@ dist:
 	make build
 
 lint:
-	$(JSHINT) .
-	$(JSCS) -c .jscsrc .
+	$(ESLINT) --ext .js .
+
+lint-quiet:
+	$(ESLINT) --ext .js --quiet .

@@ -1,6 +1,6 @@
 {
   "name": "mariner",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Seaworthy migration manager",
   "main": "dist/mariner.js",
   "scripts": {
@@ -13,7 +13,6 @@
     "url": "git://github.com/bjyoungblood/mariner.git"
   },
   "keywords": [
-    "postgres",
     "migration",
     "migrate"
   ],
@@ -24,16 +23,19 @@
   },
   "homepage": "https://github.com/bjyoungblood/mariner",
   "devDependencies": {
-    "babel": "^5.8.34",
-    "jscs": "^1.10.0",
-    "jshint": "^2.6.0"
+    "babel-cli": "^6.9.0",
+    "babel-eslint": "^6.0.4",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "eslint-plugin-cah": "^0.2.0",
+    "eslint": "^1.8.0"
   },
   "dependencies": {
     "bluebird": "^2.9.0",
-    "chalk": "^1.1.1",
+    "chalk": "^1.1.3",
     "commander": "^2.6.0",
+    "knex": "^0.11.5",
     "lodash": "^3.0.1",
-    "pg": "^4.0.0",
-    "squel": "^3.10.0"
+    "node-beautify": "0.0.5"
   }
 }
