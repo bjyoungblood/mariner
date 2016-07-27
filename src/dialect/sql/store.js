@@ -50,6 +50,7 @@ export default class sqlStore extends Store {
 
     return client(this.tableName).insert({
       name,
+      migration_time : new Date(),
     });
   }
 
