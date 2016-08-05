@@ -36,7 +36,11 @@ export default class sqlStore extends Store {
   }
 
   getClient() {
-    return sqlStore.client ? sqlStore.client : knex(this.options);
+    if (! sqlStore.client) {
+      sqlStore.client = knex(this.options);
+    }
+
+    return sqlStore.client;
   }
 
   execute(query, bindings = []) {

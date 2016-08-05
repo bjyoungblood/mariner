@@ -46,6 +46,7 @@ export class RuntimeMigrationError extends MarinerError {
 
     this.name = 'RuntimeMigrationError';
     this.message = `${filename}: ${error.message}`;
+    this.originalError = error;
   }
 }
 
