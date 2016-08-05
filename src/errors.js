@@ -1,9 +1,8 @@
-'use strict';
-
 import { format } from 'util';
 
-class MarinerError extends Error {
+export class MarinerError extends Error {
   constructor(message, code) {
+    super(...arguments);
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.message = message;
@@ -11,7 +10,7 @@ class MarinerError extends Error {
   }
 }
 
-class MigrationsDirectoryNotFoundError extends MarinerError {
+export class MigrationsDirectoryNotFoundError extends MarinerError {
   constructor(...args) {
     super(...args);
 
@@ -20,7 +19,7 @@ class MigrationsDirectoryNotFoundError extends MarinerError {
   }
 }
 
-class MigrationExistsError extends MarinerError {
+export class MigrationExistsError extends MarinerError {
   constructor(...args) {
     super(...args);
 
@@ -29,7 +28,7 @@ class MigrationExistsError extends MarinerError {
   }
 }
 
-class MigrationMissingError extends MarinerError {
+export class MigrationMissingError extends MarinerError {
   constructor(list, ...args) {
     super(...args);
 
@@ -41,7 +40,16 @@ class MigrationMissingError extends MarinerError {
   }
 }
 
-class InvalidMigrationError extends MarinerError {
+export class RuntimeMigrationError extends MarinerError {
+  constructor(filename, error, ...args) {
+    super(error.message);
+
+    this.name = 'RuntimeMigrationError';
+    this.message = `${filename}: ${error.message}`;
+  }
+}
+
+export class InvalidMigrationError extends MarinerError {
   constructor(migrationName, ...args) {
     super(...args);
 
@@ -50,7 +58,7 @@ class InvalidMigrationError extends MarinerError {
   }
 }
 
-class NoDownMigrationError extends MarinerError {
+export class NoDownMigrationError extends MarinerError {
   constructor(migrationName, ...args) {
     super(...args);
 
@@ -59,11 +67,29 @@ class NoDownMigrationError extends MarinerError {
   }
 }
 
-export default {
-  MarinerError,
-  MigrationsDirectoryNotFoundError,
-  MigrationExistsError,
-  MigrationMissingError,
-  InvalidMigrationError,
-  NoDownMigrationError,
-};
+export class NoConfigError extends MarinerError {
+  constructor(dialect, ...args) {
+    super(...args);
+
+    this.name = 'NoConfigError';
+    this.message = 'Could not locate mariner.js file run `mariner init --help` for options';
+  }
+}
+
+export class DialectMissingMethod extends MarinerError {
+  constructor(dialect, method, ...args) {
+    super(...args);
+
+    this.name = 'DialectMissingMethod';
+    this.message = `${dialect} must override ${method} method`;
+  }
+}
+
+export class DialectUnknown extends MarinerError {
+  constructor(dialect, ...args) {
+    super(...args);
+
+    this.name = 'DialectUnknown';
+    this.message = `Uknown dialect ${dialect}, try npm install --save mariner-${dialect}`;
+  }
+}

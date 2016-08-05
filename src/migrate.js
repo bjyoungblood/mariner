@@ -1,36 +1,30 @@
-'use strict';
-
 import _ from 'lodash';
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import { format } from 'util';
 import Promise from 'bluebird';
+import chalk from 'chalk';
 
-import Store from './pg-store';
+import Store from './store';
 
 import {
   MigrationsDirectoryNotFoundError,
   MigrationExistsError,
   MigrationMissingError,
-  InvalidMigrationError,
-  NoDownMigrationError,
+  RuntimeMigrationError,
+  DialectUnknown,
 } from './errors';
 
 const UP = 'up';
 const DOWN = 'down';
 
-const UP_DELIMITER = '---!> MARINER:MIGRATE:UP:';
-const DOWN_DELIMITER = '---!> MARINER:MIGRATE:DOWN:';
-
-const MIGRATION_PATTERN = /^\d{14}_[A-Za-z0-9\-]+\.sql$/;
+const MIGRATION_PATTERN = /^\d{14}_[A-Za-z0-9\-]+\./;
 const MIGRATION_NAME_FILTER = /[^A-Za-z0-9\-]+/g;
 
-const STUB_PATH = __dirname + '/../sql/migration.stub.sql';
-
-function pathExists(path) {
-  return new Promise(function(resolve, reject) {
-    fs.exists(path, function(exists) {
+function pathExists(pth) {
+  return new Promise((resolve, reject) => {
+    fs.exists(pth, (exists) => {
       resolve(exists);
     });
   });
@@ -52,18 +46,31 @@ function timestamp() {
 }
 
 export default class Migrate {
-  constructor(migrationsDir, store) {
-    assert(_.isString(migrationsDir), 'Migrate must be passed a migrations directory');
-    this.migrationsDir = migrationsDir;
+  constructor(options) {
+    assert(_.isString(options.directory), 'Migrate must be passed a migrations directory');
+    this.migrationsDir = options.directory;
 
-    this.store = null;
-
-    if (store) {
-      this.setStore(store);
+    if (options.backendStore) {
+      this.setStore(options.backendStore, options);
+    } else {
+      throw new Error('No backend provided for persistence');
     }
+
+    assert(
+      this.store instanceof Store,
+      'Specified backend is not an instance of Mariner#Store'
+    );
+
+    options.dialects = _.mapValues(options.dialects, (Dialect, key) => {
+      return new Dialect(this, options[ key ] || {}, options);
+    });
+
+    this.options = options;
   }
 
   init() {
+    const options = this.options;
+
     return pathExists(this.migrationsDir)
       .then((exists) => {
         if (! exists) {
@@ -73,27 +80,52 @@ export default class Migrate {
         return fs.readdirAsync(this.migrationsDir);
       })
       .then((migrationFiles) => {
-        this.migrations = _.filter(migrationFiles, (file) => file.match(MIGRATION_PATTERN));
+        this.migrations = _.filter(migrationFiles, (file) => {
+          if (! this.getDialect(file)) {
+            const warning = chalk.yellow(
+              `${chalk.red('[WARNING]')} skipping ${file}, no dialect/plugin`
+            );
+
+            if (this.options.stopOnWarning) {
+              throw new DialectUnknown(this.getDialectFromFile(file));
+            } else {
+              console.log(warning); // eslint-disable-line no-console
+            }
+          }
+
+          return file.match(MIGRATION_PATTERN);
+        });
+      })
+      .then(() => {
+        return this.store.init(_.get(options, options.backend, {}));
       });
   }
 
-  setStore(store) {
+  setStore(store, options = this.options) {
+    if (_.isFunction(store)) {
+      const storeOptions = options[ options.backend ] || {};
+
+      storeOptions.isBackend = true;
+
+      store = new store(storeOptions, options);
+      store.init = Promise.method(store.init.bind(store));
+    }
+
     assert(store instanceof Store, 'store must be an instance of Store');
+
     this.store = store;
   }
 
   computeUpDiff() {
-    return this.store.listRunMigrations().then((migrations) => {
-
-      var dbMigrations = _.pluck(migrations, 'name');
-
+    return this.store.list().then((migrations) => {
       // Ensure all the migrations in the database exist
-      var missing = _.difference(dbMigrations, this.migrations);
+      const missing = _.difference(migrations, this.migrations);
+
       if (missing.length) {
         throw new MigrationMissingError(missing);
       }
 
-      var newMigrations = _.difference(this.migrations, dbMigrations);
+      const newMigrations = _.difference(this.migrations, migrations);
 
       // Migrations should be sorted, but _.difference does not document stability
       newMigrations.sort();
@@ -103,11 +135,13 @@ export default class Migrate {
   }
 
   getDownCandidates() {
-    return this.store.listRunMigrations()
-      .then((migrations) => _.pluck(migrations, 'name').reverse());
+    return this.store.list()
+      .then((migrations) => migrations.reverse());
   }
 
   run(direction, count = null) {
+    let promise;
+
     assert(direction === UP || direction === DOWN, 'direction must be one of: up, down');
 
     if (count !== null) {
@@ -117,7 +151,7 @@ export default class Migrate {
     }
 
     if (direction === 'up') {
-      return this.computeUpDiff()
+      promise = this.computeUpDiff()
         .then((migrations) => {
           if (count) {
             migrations = migrations.slice(0, count);
@@ -126,7 +160,7 @@ export default class Migrate {
           return Promise.each(migrations, (name) => this.runOne(direction, name));
         });
     } else {
-      return this.getDownCandidates()
+      promise = this.getDownCandidates()
         .then((migrations) => {
           if (! count) {
             count = 1;
@@ -137,86 +171,56 @@ export default class Migrate {
           return Promise.each(migrations, (name) => this.runOne(direction, name));
         });
     }
+
+    return promise;
   }
 
   runOne(direction, name) {
     assert(direction === UP || direction === DOWN, 'direction must be one of: up, down');
 
-    return this.getMigrationSqlFromFile(direction, name)
-      .then((sql) => this.store.migrate(direction, name, sql))
+    const dialect = this.getDialect(name);
+
+    assert(dialect, `unknown dialect for migration file: ${name}`);
+
+    const migrate = Promise.method(dialect.migrate.bind(dialect));
+
+    return migrate(direction, name)
+      .then(() => {
+        return direction === UP ? this.store.record(name) :
+                                  this.store.delete(name);
+      })
       .tap(() => {
         if (direction === UP) {
-          console.log('⛵\tUP: %s', name);
+          console.log('⛵\tUP: %s', name); // eslint-disable-line no-console
         } else {
-          console.log('⛵\tDOWN: %s', name);
+          console.log('⛵\tDOWN: %s', name); // eslint-disable-line no-console
         }
+      })
+      .catch((e) => {
+        throw new RuntimeMigrationError(name, e);
       });
   }
 
-  getMigrationSqlFromFile(direction, name) {
-    let filename = path.join(this.migrationsDir, name);
+  getDialectFromFile(file) {
+    return path.extname(file).replace('.', '');
+  }
 
-    return fs.readFileAsync(filename, { encoding : 'utf8' }).then((sql) => {
+  getDialect(name) {
+    const ext = this.getDialectFromFile(name);
 
-      if (direction === UP) {
-        return this.getUpMigration(sql, name);
-      } else if (direction === DOWN) {
-        return this.getDownMigration(sql, name);
-      } else {
-        throw new Error('Invalid direction');
-      }
-
+    return _.find(this.options.dialects, (dialect) => {
+      return dialect.constructor.check(ext);
     });
   }
 
-  getUpMigration(sql, name) {
-    var lines = sql.split('\n');
-    var output = [];
-
-    var adding = false;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].indexOf(UP_DELIMITER) === 0) {
-        adding = true;
-        continue;
-      }
-
-      if (lines[i].indexOf(DOWN_DELIMITER) === 0) {
-        break;
-      }
-
-      if (adding) {
-        output.push(lines[i]);
-      }
-    }
-
-    if (output.length === 0) {
-      throw new InvalidMigrationError(name);
-    }
-
-    return output.join('\n');
+  getMigrationPath(name) {
+    return path.join(this.migrationsDir, name);
   }
 
-  getDownMigration(sql, name) {
-    var lines = sql.split('\n');
-    var output = [];
+  getMigrationContent(direction, name) {
+    let filename = this.getMigrationPath(name);
 
-    var adding = false;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].indexOf(DOWN_DELIMITER) === 0) {
-        adding = true;
-        continue;
-      }
-
-      if (adding) {
-        output.push(lines[i]);
-      }
-    }
-
-    if (output.length === 0) {
-      throw new NoDownMigrationError(name);
-    }
-
-    return output.join('\n');
+    return fs.readFileAsync(filename, { encoding : 'utf8' });
   }
 
   /**
@@ -231,42 +235,34 @@ export default class Migrate {
    * @param  {string} name Migration name
    * @return {Promise}
    */
-  create(name) {
-    return new Promise((resolve, reject) => {
-      var filename = format(
-        '%s_%s.sql',
-        timestamp(),
-        name.replace(MIGRATION_NAME_FILTER, '-')
-      );
+  create(name, options) {
+    const filename = format(
+      '%s_%s.%s',
+      timestamp(),
+      name.replace(MIGRATION_NAME_FILTER, '-'),
+      options.extension,
+    );
 
-      var destPath = path.join(this.migrationsDir, filename);
+    const destPath = path.join(this.migrationsDir, filename);
 
-      return pathExists(this.migrationsDir)
-        .then((exists) => {
-          if (exists) {
-            return;
-          }
+    return pathExists(this.migrationsDir)
+      .then((exists) => {
+        return exists ? null : fs.mkdir(this.migrationsDir);
+      })
+      .then(() => pathExists(destPath))
+      .then((exists) => {
+        if (exists) {
+          throw new MigrationExistsError();
+        }
 
-          return fs.mkdir(this.migrationsDir);
-        })
-        .then(() => pathExists(destPath))
-        .then((exists) => {
-          if (exists) {
-            throw new MigrationExistsError();
-          }
+        return this.getDialect(filename);
+      })
+      .then((dialect) => {
+        if (! dialect) {
+          throw new DialectUnknown(options.extension);
+        }
 
-          var source = fs.createReadStream(STUB_PATH);
-          var dest = fs.createWriteStream(destPath);
-
-          source.on('error', reject);
-          dest.on('error', reject);
-
-          dest.on('finish', () => resolve(destPath));
-
-          source.pipe(dest);
-        });
-
-    });
+        return dialect.create(destPath, options);
+      });
   }
-
 }
